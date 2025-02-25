@@ -1,7 +1,7 @@
 {
   "name": "@cv-pack/event-emitter",
   "type": "module",
-  "version": "0.0.0",
+  "version": "1.0.0-beta.1",
   "packageManager": "pnpm@10.2.1",
   "description": "_description_",
   "author": "CV <ycxgzs@gmail.com>",
