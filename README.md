@@ -159,5 +159,3 @@ emitter.emit('user-login', 'john_doe', 123) // 正确，类型匹配
 ## License
 
 MIT License
-
-```
