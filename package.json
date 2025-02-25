@@ -1,7 +1,7 @@
 {
   "name": "@cv-pack/event-emitter",
   "type": "module",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "packageManager": "pnpm@10.2.1",
   "description": "EventEmitter 是一个轻量级的事件处理库，提供了事件监听、触发、一次性监听器以及移除监听器等功能。它支持多参数事件类型，并且在 TypeScript 中拥有完全的类型安全，允许开发者清晰地定义事件和其对应的参数类型。EventEmitter 使得事件驱动编程更加简单且易于维护。",
   "author": "CV <ycxgzs@gmail.com>",
