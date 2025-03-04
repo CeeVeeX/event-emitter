@@ -12,8 +12,8 @@ export interface DefaultListener {
  * Example usage:
  * ```typescript
  * interface MyEvents {
- *   'user-login': [string, number]; // User login event with username and userId
- *   'data-fetch': [string]; // Data fetch event with URL
+ *   'user-login': (username: string, userId: number) => void; // User login event with username and userId
+ *   'data-fetch': (url: string) => void ; // Data fetch event with URL
  * }
  *
  * const emitter = new EventEmitter<MyEvents>();
