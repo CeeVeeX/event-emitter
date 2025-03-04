@@ -1,18 +1,10 @@
-/**
- * Listener type defines a function that listens for events and takes multiple arguments.
- *
- * @param T - A tuple of arguments that the listener expects.
- */
-export type Listener<T extends any[]> = (...args: T) => void
-
-/**
- * EventMap interface defines a mapping of event names to their corresponding argument types.
- * Each event name corresponds to a tuple of arguments.
- */
-export interface EventMap {
-  [eventName: string | number | symbol]: any[] // A mapping from event names to an array of arguments.
+export type ListenerSignature<L> = {
+  [E in keyof L]: (...args: any[]) => any;
 }
 
+export interface DefaultListener {
+  [k: string]: (...args: any[]) => any
+}
 /**
  * EventEmitter class implements an event emitter that supports multiple arguments per event.
  * It allows adding, removing, and emitting events.
@@ -33,9 +25,9 @@ export interface EventMap {
  * emitter.emit('user-login', 'john_doe', 123); // Triggers the event
  * ```
  */
-export class EventEmitter<T extends Record<keyof T, any[]>> {
+export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
   // A dictionary to store event names and their associated listeners
-  private events: { [K in keyof T]?: Listener<T[K]>[] } = {}
+  private events: Partial<Record<keyof L, L[keyof L][]>> = {}
 
   /**
    * Registers a listener for a specific event.
@@ -50,7 +42,7 @@ export class EventEmitter<T extends Record<keyof T, any[]>> {
    * });
    * ```
    */
-  on<K extends keyof T>(event: K, listener: Listener<T[K]>): EventEmitter<T> {
+  on<U extends keyof L>(event: U, listener: L[U]): this {
     // Initialize an empty array for listeners if not already set
     if (!this.events[event]) {
       this.events[event] = []
@@ -75,14 +67,15 @@ export class EventEmitter<T extends Record<keyof T, any[]>> {
    * });
    * ```
    */
-  once<K extends keyof T>(event: K, listener: Listener<T[K]>): EventEmitter<T> {
-    // Create a wrapper listener that removes itself after being called once
-    const onceListener: Listener<T[K]> = (...args) => {
-      listener(...args) // Invoke the original listener
-      this.off(event, onceListener) // Remove this one-time listener
+  once<U extends keyof L>(event: U, listener: L[U]): this {
+    // Create a wrapper listener that removes itself after being invoked
+    const _wrapper = (...args: any[]): void => {
+      listener(...args)
+      this.off(event, _wrapper as L[U])
     }
-    // Register the one-time listener
-    this.on(event, onceListener)
+
+    // Register the wrapper listener
+    this.on(event, _wrapper as L[U])
 
     return this
   }
@@ -99,13 +92,14 @@ export class EventEmitter<T extends Record<keyof T, any[]>> {
    * // This will trigger all listeners for 'user-login' with 'john_doe' and '123' as arguments.
    * ```
    */
-  emit<K extends keyof T>(event: K, ...args: T[K]): EventEmitter<T> {
+  emit<U extends keyof L>(event: U, ...args: Parameters<L[U]>): boolean {
     // Check if the event has listeners, and if so, invoke each listener with the provided arguments
     if (this.events[event]) {
       this.events[event]!.forEach(listener => listener(...args))
+      return true
     }
 
-    return this
+    return false
   }
 
   /**
@@ -121,7 +115,7 @@ export class EventEmitter<T extends Record<keyof T, any[]>> {
    * emitter.off('user-login', listener); // This will remove the listener
    * ```
    */
-  off<K extends keyof T>(event: K, listener: Listener<T[K]>): EventEmitter<T> {
+  off<U extends keyof L>(event: U, listener: L[U]): this {
     // If the event has listeners, filter out the listener to remove it
     if (this.events[event]) {
       this.events[event] = this.events[event]!.filter(l => l !== listener)
@@ -139,7 +133,7 @@ export class EventEmitter<T extends Record<keyof T, any[]>> {
    * emitter.offAll(); // Removes all listeners for all events
    * ```
    */
-  offAll(): EventEmitter<T> {
+  offAll(): this {
     // Clear the events registry completely
     this.events = {}
 
