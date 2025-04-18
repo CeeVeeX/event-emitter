@@ -32,7 +32,7 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
   /**
    * Registers a listener for a specific event.
    *
-   * @param event - The name of the event to listen for.
+   * @param event - The name of the event to listen for, * for wildcard listeners.
    * @param listener - The callback function to execute when the event is emitted.
    *
    * Example:
@@ -57,7 +57,7 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
    * Registers a one-time listener for a specific event.
    * The listener is automatically removed after being invoked once.
    *
-   * @param event - The name of the event to listen for.
+   * @param event - The name of the event to listen for, * for wildcard listeners.
    * @param listener - The callback function to execute when the event is emitted (only once).
    *
    * Example:
@@ -93,6 +93,14 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
    * ```
    */
   emit<U extends keyof L>(event: U, ...args: Parameters<L[U]>): boolean {
+    // Check if the event has a wildcard listener and invoke it with the provided arguments
+    if ((this.events as any)['*']) {
+      (this.events as any)['*']!.forEach((listener: any) => listener(event, {
+        args: args as any,
+        event: event as any,
+      }))
+    }
+
     // Check if the event has listeners, and if so, invoke each listener with the provided arguments
     if (this.events[event]) {
       this.events[event]!.forEach(listener => listener(...args))
