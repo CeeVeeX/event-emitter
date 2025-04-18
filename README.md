@@ -33,8 +33,8 @@ pnpm add @cv-pack/event-emitter
 ```typescript
 // 定义事件类型
 interface MyEvents {
-  'user-login': [string, number] // 用户登录事件，带有用户名和用户ID
-  'data-fetch': [string] // 数据获取事件，带有URL
+  'user-login': (name: string, n: number) => void // 用户登录事件，带有用户名和用户ID
+  'data-fetch': (name: string) => void // 数据获取事件，带有URL
 }
 
 // 创建一个 EventEmitter 实例
@@ -136,8 +136,8 @@ emitter.emit('user-login', 'john_doe', 123)
 
 ```typescript
 interface MyEvents {
-  'user-login': [string, number] // 用户登录事件
-  'data-fetch': [string] // 数据获取事件
+  'user-login': (name: string, n: number) => void // 用户登录事件，带有用户名和用户ID
+  'data-fetch': (name: string) => void // 数据获取事件，带有URL
 }
 
 const emitter = new EventEmitter<MyEvents>()
