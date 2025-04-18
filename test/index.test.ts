@@ -19,6 +19,12 @@ describe('eventEmitter', () => {
     const listener = vi.fn()
 
     // 注册监听器
+    emitter.on('*', (a) => {
+      // eslint-disable-next-line no-console
+      console.log('Wildcard listener:', a)
+    })
+
+    // 注册监听器
     emitter.on('user-login', listener)
 
     // 触发事件

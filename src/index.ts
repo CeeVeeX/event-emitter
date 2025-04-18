@@ -5,6 +5,17 @@ export type ListenerSignature<L> = {
 export interface DefaultListener {
   [k: string]: (...args: any[]) => any
 }
+
+// Define a new type to handle '*' events
+type WildcardListener<L extends ListenerSignature<L>> = (data: {
+  args: Parameters<L[keyof L]>
+  event: keyof L
+}) => ReturnType<L[keyof L]>
+
+export type ExtendedListenerSignature<L extends ListenerSignature<L>> = L & {
+  '*': WildcardListener<L>
+}
+
 /**
  * EventEmitter class implements an event emitter that supports multiple arguments per event.
  * It allows adding, removing, and emitting events.
@@ -27,7 +38,7 @@ export interface DefaultListener {
  */
 export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
   // A dictionary to store event names and their associated listeners
-  private events: Partial<Record<keyof L, L[keyof L][]>> = {}
+  private events: Partial<Record<keyof ExtendedListenerSignature<L>, ExtendedListenerSignature<L>[keyof ExtendedListenerSignature<L>][]>> = {}
 
   /**
    * Registers a listener for a specific event.
@@ -42,13 +53,13 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
    * });
    * ```
    */
-  on<U extends keyof L>(event: U, listener: L[U]): this {
+  on<U extends keyof ExtendedListenerSignature<L>>(event: U, listener: ExtendedListenerSignature<L>[U]): this {
     // Initialize an empty array for listeners if not already set
     if (!this.events[event]) {
       this.events[event] = []
     }
     // Add the listener to the event's listeners array
-    this.events[event]!.push(listener)
+    this.events[event]!.push(listener as any)
 
     return this
   }
@@ -67,15 +78,15 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
    * });
    * ```
    */
-  once<U extends keyof L>(event: U, listener: L[U]): this {
+  once<U extends keyof ExtendedListenerSignature<L>>(event: U, listener: ExtendedListenerSignature<L>[U]): this {
     // Create a wrapper listener that removes itself after being invoked
     const _wrapper = (...args: any[]): void => {
-      listener(...args)
-      this.off(event, _wrapper as L[U])
+      (listener as (...args: any[]) => void)(...args)
+      this.off(event, _wrapper as ExtendedListenerSignature<L>[U])
     }
 
     // Register the wrapper listener
-    this.on(event, _wrapper as L[U])
+    this.on(event, _wrapper as ExtendedListenerSignature<L>[U])
 
     return this
   }
@@ -94,16 +105,16 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
    */
   emit<U extends keyof L>(event: U, ...args: Parameters<L[U]>): boolean {
     // Check if the event has a wildcard listener and invoke it with the provided arguments
-    if ((this.events as any)['*']) {
-      (this.events as any)['*']!.forEach((listener: any) => listener(event, {
-        args: args as any,
-        event: event as any,
+    if (this.events['*']) {
+      this.events['*']!.forEach((listener: WildcardListener<L>) => listener({
+        args: args as Parameters<L[keyof L]>,
+        event,
       }))
     }
 
     // Check if the event has listeners, and if so, invoke each listener with the provided arguments
     if (this.events[event]) {
-      this.events[event]!.forEach(listener => listener(...args))
+      this.events[event]!.forEach(listener => (listener as (...args: any[]) => void)(...args))
       return true
     }
 
@@ -123,7 +134,7 @@ export class EventEmitter<L extends ListenerSignature<L> = DefaultListener> {
    * emitter.off('user-login', listener); // This will remove the listener
    * ```
    */
-  off<U extends keyof L>(event: U, listener: L[U]): this {
+  off<U extends keyof ExtendedListenerSignature<L>>(event: U, listener: ExtendedListenerSignature<L>[U]): this {
     // If the event has listeners, filter out the listener to remove it
     if (this.events[event]) {
       this.events[event] = this.events[event]!.filter(l => l !== listener)
