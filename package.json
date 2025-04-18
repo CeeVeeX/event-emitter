@@ -4,15 +4,15 @@
   "version": "1.1.3",
   "packageManager": "pnpm@10.2.1",
   "description": "EventEmitter 是一个轻量级的事件处理库，提供了事件监听、触发、一次性监听器以及移除监听器等功能。它支持多参数事件类型，并且在 TypeScript 中拥有完全的类型安全，允许开发者清晰地定义事件和其对应的参数类型。EventEmitter 使得事件驱动编程更加简单且易于维护。",
-  "author": "CV <ycxgzs@gmail.com>",
+  "author": "Cee Vee X <ycxgzs@gmail.com>",
   "license": "MIT",
-  "funding": "https://github.com/sponsors/noicu",
-  "homepage": "https://github.com/noicu/event-emitter#readme",
+  "funding": "https://github.com/sponsors/ceeveex",
+  "homepage": "https://github.com/ceeveex/event-emitter#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/noicu/event-emitter.git"
+    "url": "git+https://github.com/ceeveex/event-emitter.git"
   },
-  "bugs": "https://github.com/noicu/event-emitter/issues",
+  "bugs": "https://github.com/ceeveex/event-emitter/issues",
   "keywords": [],
   "sideEffects": false,
   "exports": {
